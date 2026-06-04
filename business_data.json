@@ -1,0 +1,10 @@
+{
+  "business_name": "My Online Store",
+  "business_description": "We are an online store based in Pakistan selling quality products at affordable prices. We offer a wide range of items including clothing, electronics, home goods, and accessories. Our prices range from Rs. 500 to Rs. 10,000. We provide fast delivery (2-3 working days) across Pakistan. We accept cash on delivery, bank transfer, and Easypaisa/JazzCash. For any queries, contact us Monday to Saturday, 9 AM to 6 PM at 0300-XXXXXXX. We have a 7-day return/exchange policy. Customer satisfaction is our top priority.",
+  "working_hours": "Monday - Saturday, 9 AM - 6 PM",
+  "contact_number": "0300-XXXXXXX",
+  "delivery_time": "2-3 working days",
+  "payment_methods": ["Cash on Delivery", "Bank Transfer", "Easypaisa", "JazzCash"],
+  "return_policy": "7-day return and exchange policy",
+  "price_range": "Rs. 500 to Rs. 10,000"
+}
