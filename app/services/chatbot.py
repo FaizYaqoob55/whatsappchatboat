@@ -22,6 +22,8 @@ settings = get_settings()
 
 # ── In-Memory Chat Sessions (phone → ChatSession) ────────────────────────────
 _sessions: dict[str, ChatSession] = {}
++from app.services.session_store import SessionStore
++_session_store = SessionStore()
 
 
 def _load_business_data() -> dict:
@@ -63,14 +65,15 @@ def _load_business_data() -> dict:
 
 
 def get_or_create_session(phone: str) -> ChatSession:
-    if phone not in _sessions:
-        _sessions[phone] = ChatSession(phone=phone)
-        logger.debug(f"New session | phone={phone}")
-    return _sessions[phone]
+    """Retrieve an existing ChatSession for *phone* or create a new one.
+    The SessionStore persists sessions to a JSON file, ensuring data survives process restarts.
+    """
+    return _session_store.get_or_create(phone)
 
 
 def clear_session(phone: str) -> None:
-    _sessions.pop(phone, None)
+    """Remove a chat session for *phone* from persistent storage."""
+    _session_store.clear(phone)
 
 
 # ── System Prompt ─────────────────────────────────────────────────────────────

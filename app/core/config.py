@@ -24,7 +24,8 @@ class Settings(BaseSettings):
     app_port: int = 8000
     log_level: str = "INFO"
 
-    # Business
+    # Session store
+    session_store_path: str = "data/sessions.json"
     business_name: str = "My Online Store"
     business_description: str = "We sell quality products online in Pakistan"
 
