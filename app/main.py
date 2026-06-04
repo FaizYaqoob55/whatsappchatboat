@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"🚀 {settings.business_name} WhatsApp Chatbot starting...")
     logger.info(f"   Environment : {settings.app_env}")
     logger.info(f"   Phone ID    : {settings.whatsapp_phone_number_id or 'NOT SET'}")
-    logger.info(f"   OpenAI      : {'✅ configured' if settings.openai_api_key else '❌ NOT SET'}")
+    logger.info(f"   OpenAI      : {'✅ configured' if settings.OPENAI_API_KEY else '❌ NOT SET'}")
     logger.info("=" * 50)
     yield
     # ── Shutdown ──

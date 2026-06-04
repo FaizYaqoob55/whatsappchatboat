@@ -139,12 +139,12 @@ async def generate_reply(phone: str, message: str) -> str:
 
 async def _call_groq(session: ChatSession) -> str:
     """Call the Groq API with the system prompt and full conversation history."""
-    if not settings.groq_api_key:
-        logger.error("GROQ_API_KEY not set in .env!")
+    if not settings.OPENAI_API_KEY:
+        logger.error("OPENAI_API_KEY not set in .env!")
         return "⚠️ The bot is not configured yet. Please try again later."
 
     try:
-        client = AsyncGroq(api_key=settings.groq_api_key)
+        client = AsyncGroq(api_key=settings.OPENAI_API_KEY)
 
         messages = [
             {"role": "system", "content": build_system_prompt()}
@@ -153,7 +153,7 @@ async def _call_groq(session: ChatSession) -> str:
         messages.extend(session.get_openai_history())
 
         response = await client.chat.completions.create(
-            model=settings.groq_model,
+            model=settings.OPENAI_MODEL,
             messages=messages,
             max_tokens=400,
             temperature=0.7,
@@ -162,7 +162,7 @@ async def _call_groq(session: ChatSession) -> str:
 
         reply = response.choices[0].message.content.strip()
         logger.debug(
-            f"Groq success | model={settings.groq_model} "
+            f"Groq success | model={settings.OPENAI_MODEL} "
             f"| tokens={response.usage.total_tokens}"
         )
         return reply
