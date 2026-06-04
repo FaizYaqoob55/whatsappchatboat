@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = "mera_secret_verify_token_123"
 
     # OpenAI
-    openai_api_key: str = ""
-    openai_model: str = "gpt-3.5-turbo"
+    OPENAI_API_KEY="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"
+    OPENAI_MODEL="llama-3.1-8b-instant"
 
     # App
     app_env: str = "development"

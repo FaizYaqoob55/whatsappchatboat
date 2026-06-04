@@ -1,176 +1,152 @@
 """
-Chatbot Brain Service
-Intent ke mutabiq sahi reply generate karta hai.
-In-memory chat sessions (no DB needed for testing).
+Chatbot Brain — Powered by Groq AI
+=====================================
+Groq AI ko ek baar call karo with full system prompt.
+AI khud samjhega:
+  - Customer kya pooch raha hai
+  - Order status / price / complaint / greeting — sab AI handle karega
+  - Natural Urdu/Roman Urdu mein reply banega
+  - No dumb keyword matching — pure AI understanding
 """
 from loguru import logger
-from openai import AsyncOpenAI
+from groq import AsyncGroq
 
 from app.core.config import get_settings
 from app.models.schemas import ChatSession
-from app.services.intent import detect_intent, Intent
 
 settings = get_settings()
 
-# ── In-Memory Session Store (phone → ChatSession) ────────────────────────────
-# Production mein Redis se replace kar dena, abhi testing ke liye yahi kaafi hai
+# ── In-Memory Chat Sessions (phone → ChatSession) ────────────────────────────
 _sessions: dict[str, ChatSession] = {}
 
 
 def get_or_create_session(phone: str) -> ChatSession:
     if phone not in _sessions:
         _sessions[phone] = ChatSession(phone=phone)
-        logger.debug(f"New session created | phone={phone}")
+        logger.debug(f"New session | phone={phone}")
     return _sessions[phone]
 
 
 def clear_session(phone: str) -> None:
     _sessions.pop(phone, None)
-    logger.debug(f"Session cleared | phone={phone}")
 
 
-# ── Fixed Replies ─────────────────────────────────────────────────────────────
+# ── System Prompt — AI ka poora brain yahan hai ──────────────────────────────
 
-_GREETING_REPLY = """\
-👋 *Assalam o Alaikum!* {business_name} mein khush aamdeed!
+def build_system_prompt() -> str:
+    return f"""
+Tum "{settings.business_name}" ke smart aur friendly WhatsApp customer service agent ho.
 
-Main aapki kaise madad kar sakta hoon? 😊
+Business ke baare mein:
+{settings.business_description}
 
-Aap ye puch sakte hain:
-• 📦 *Order status* — "mera order kab ayga?"
-• 💰 *Prices* — "price kya hai?"
-• 🙋 *Human agent* — "mujhe agent se baat karni hai"
-• Koi bhi aur sawaal!"""
+Tumhara kaam:
+1. Customer jo bhi pooche — uska samajh dar jawab do apni AI understanding se
+2. Har reply natural honi chahiye, jaise koi real insaan likh raha ho
+3. Sirf WhatsApp formatting use karo: *bold*, _italic_, newlines
 
-_ORDER_STATUS_REPLY = """\
-📦 *Order Status*
+Alag alag situations mein kaise reply karo:
 
-Abhi hum database se connect nahi hain (testing mode). 
+GREETINGS (hi, salam, hello, aoa, etc.):
+- Warmly welcome karo
+- {settings.business_name} ka naam lo
+- Briefly batao tum kya help kar sakte ho
+- Emoji zaroor use karo
 
-Agar aap order number bhejein to main check kar sakta hoon! 
+ORDER STATUS (kab ayga, delivery, tracking, parcel, etc.):
+- Sympathetically acknowledge karo ke customer apna order track karna chahta hai
+- Explain karo ke abhi system testing mode mein hai
+- Customer se order ID maango
+- Realistic lagney wala reply do, jaise: "Aapka order processing mein hai, 2-3 working days mein deliver ho jayega"
+- Agar order ID den to confirm karo aur approximate timeline do
 
-*Example:* ORD-12345
+PRICE INQUIRY (price, qeemat, kitna, cost, rate, etc.):
+- Customer ke specific product ya category ka puchho agar clear na ho
+- General pricing info do: "Hamare products Rs. 500 se Rs. 5000 tak available hain"
+- Discount ya deals mention karo agar relevant lage
+- Website ya catalog ka zikr karo
 
-_(Jald hi real-time order tracking available hogi!)_"""
+COMPLAINTS (problem, issue, galat, damage, refund, return, etc.):
+- Pehle genuinely sorry kaho, customer ki frustration samjho
+- Phir problem solve karne ka process batao
+- Human agent se connect karne ki offer karo
+- Assure karo ke issue resolve hoga
 
-_FAREWELL_REPLY = """\
-🙏 *Shukriya* {business_name} se contact karne ka!
+HUMAN AGENT REQUEST (agent, insaan, manager, call, etc.):
+- Acknowledge karo
+- Working hours batao: Monday-Saturday, 9 AM - 6 PM
+- Contact number: 0300-XXXXXXX
+- Estimated wait time batao
 
-Kisi bhi waqt dobara message kar saktay hain. Allah Hafiz! 😊"""
+GENERAL QUESTIONS (koi bhi aur sawaal):
+- AI ki full understanding use karo
+- Helpful, accurate jawab do
+- Agar answer nahi pata to honestly kaho aur agent suggest karo
 
-_COMPLAINT_REPLY = """\
-😔 Mujhe afsos hai ke aapko koi takleef hui.
-
-Aapki complaint hamein zaroor solve karni chahiye.
-
-🔴 *Kya aap chahte hain ke main aapko ek human agent se connect karoon?*
-
-Bas "haan" ya "agent" likh kar bhejein."""
-
-_HUMAN_AGENT_REPLY = """\
-👨‍💼 *Human Agent se Connection*
-
-Main abhi aapko hamari team ko forward kar raha hoon.
-
-⏳ *Expected wait time:* 5-10 minutes
-
-Hamare working hours hain:
-🕘 *Monday-Saturday:* 9 AM – 6 PM
-
-Agar urgent ho to aap is number pe call bhi kar saktay hain:
-📞 *0300-XXXXXXX*"""
-
-_PRICE_REPLY = """\
-💰 *Price Inquiry*
-
-Hamari website pe updated prices available hain.
-
-Kisi specific product ka price chahiye to product ka naam bhejein, main help karoonga! 🛍️"""
-
-_FALLBACK_REPLY = """\
-Maafi chahta hoon, main samajh nahi paya. 
-
-Kya aap dobara likh sakte hain? Ya main aapko *human agent* se connect kar doon?"""
+IMPORTANT RULES:
+- Hamesha Urdu ya Roman Urdu mein jawab do (customer jis language mein likhe)
+- Reply max 4-5 lines rakho — WhatsApp pe log lambe message nahi padhte
+- Robotic mat lago — real insaan ki tarah bolo
+- Agar customer angry ho to extra polite raho
+- Har reply pe relevant emoji use karo (zyada nahi, 1-2 enough)
+- Customer ka naam pata ho to use karo
+""".strip()
 
 
 # ── Main Reply Generator ──────────────────────────────────────────────────────
 
 async def generate_reply(phone: str, message: str) -> str:
     """
-    Customer ke message ka intent detect karo aur reply do.
+    Customer ke message ka Groq AI se natural reply generate karo.
+    AI khud intent samjhega — koi manual keyword matching nahi.
     """
     session = get_or_create_session(phone)
     session.add_message("user", message)
 
-    intent = detect_intent(message)
-    logger.info(f"Intent detected | phone={phone} | intent={intent} | msg='{message[:50]}'")
+    logger.info(f"Generating AI reply | phone={phone} | msg='{message[:60]}'")
 
-    biz = settings.business_name
-
-    if intent == Intent.GREETING:
-        reply = _GREETING_REPLY.format(business_name=biz)
-
-    elif intent == Intent.ORDER_STATUS:
-        reply = _ORDER_STATUS_REPLY
-
-    elif intent == Intent.FAREWELL:
-        reply = _FAREWELL_REPLY.format(business_name=biz)
-
-    elif intent == Intent.COMPLAINT:
-        reply = _COMPLAINT_REPLY
-
-    elif intent == Intent.HUMAN_AGENT:
-        reply = _HUMAN_AGENT_REPLY
-        clear_session(phone)  # Session reset after handoff
-
-    elif intent == Intent.PRICE_INQUIRY:
-        reply = _PRICE_REPLY
-
-    else:
-        # General question — AI se reply lo
-        reply = await _get_ai_reply(session, message)
+    reply = await _call_groq(session)
 
     session.add_message("assistant", reply)
+    logger.info(f"Reply ready | phone={phone} | reply='{reply[:60]}'")
     return reply
 
 
-async def _get_ai_reply(session: ChatSession, user_message: str) -> str:
+async def _call_groq(session: ChatSession) -> str:
     """
-    OpenAI GPT se context-aware reply generate karo.
+    Groq API call — system prompt + full conversation history bhejo.
     """
-    if not settings.openai_api_key:
-        logger.warning("OpenAI API key not set — using fallback reply")
-        return _FALLBACK_REPLY
-
-    system_prompt = f"""\
-Tum {settings.business_name} ke helpful customer service assistant ho.
-
-Business description: {settings.business_description}
-
-Rules:
-1. Hamesha Urdu ya Roman Urdu mein jawab do (customer jis language mein likhe)
-2. Jawab concise rakho (3-5 lines max)
-3. Friendly aur professional raho
-4. Agar kuch nahi pata to honestly bol do aur agent se connect karne ki offer karo
-5. Markdown bold (*text*) use kar sakte ho WhatsApp ke liye
-6. Emojis use karo lekin zyada nahi"""
+    if not settings.groq_api_key:
+        logger.error("GROQ_API_KEY not set in .env!")
+        return "⚠️ Bot abhi configure ho raha hai. Thori der baad try karein."
 
     try:
-        client = AsyncOpenAI(api_key=settings.openai_api_key)
+        client = AsyncGroq(api_key=settings.groq_api_key)
 
-        messages = [{"role": "system", "content": system_prompt}]
+        messages = [
+            {"role": "system", "content": build_system_prompt()}
+        ]
+        # Full conversation history add karo — AI ko context milega
         messages.extend(session.get_openai_history())
 
         response = await client.chat.completions.create(
-            model=settings.openai_model,
+            model=settings.groq_model,
             messages=messages,
-            max_tokens=300,
-            temperature=0.7,
+            max_tokens=400,
+            temperature=0.75,      # thoda natural variation
+            top_p=0.9,
         )
+
         reply = response.choices[0].message.content.strip()
-        logger.debug(f"AI reply generated | tokens={response.usage.total_tokens}")
+        logger.debug(
+            f"Groq success | model={settings.groq_model} "
+            f"| tokens={response.usage.total_tokens}"
+        )
         return reply
 
     except Exception as e:
-        logger.error(f"OpenAI error: {e}")
-        return _FALLBACK_REPLY
+        logger.error(f"Groq API error: {e}", exc_info=True)
+        return (
+            "Maafi chahta hoon, abhi ek technical masla aa gaya hai. 😔\n"
+            "Thori der baad dobara try karein ya *0300-XXXXXXX* pe call karein."
+        )
