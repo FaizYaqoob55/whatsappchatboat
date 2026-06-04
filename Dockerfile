@@ -25,14 +25,14 @@ USER appuser
 # Port expose karo
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Railway manages healthchecks externally via healthcheckPath setting
+# No need for Docker HEALTHCHECK directive
 
 # Production mein gunicorn use karo
-CMD ["gunicorn", "app.main:app", \
-     "--worker-class", "uvicorn.workers.UvicornWorker", \
-     "--workers", "2", \
-     "--bind", "0.0.0.0:8000", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-"]
+# Shell form enables $PORT expansion; fallback to 8000 for local dev
+CMD gunicorn app.main:app \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --workers 2 \
+    --bind 0.0.0.0:${PORT:-8000} \
+    --access-logfile - \
+    --error-logfile -
