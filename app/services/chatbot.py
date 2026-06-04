@@ -22,8 +22,8 @@ settings = get_settings()
 
 # ── In-Memory Chat Sessions (phone → ChatSession) ────────────────────────────
 _sessions: dict[str, ChatSession] = {}
-+from app.services.session_store import SessionStore
-+_session_store = SessionStore()
+from app.services.session_store import SessionStore
+_session_store = SessionStore()
 
 
 def _load_business_data() -> dict:
