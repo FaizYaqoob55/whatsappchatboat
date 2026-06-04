@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from threading import Lock
+from threading import RLock
 from typing import Dict
 
 from loguru import logger
@@ -15,7 +15,7 @@ class SessionStore:
 
     - Loads existing sessions from the JSON file defined by ``settings.session_store_path``.
     - Persists sessions after any modification.
-    - Thread‑safe via a ``Lock`` because FastAPI can run concurrent requests.
+    - Thread‑safe via an ``RLock`` because FastAPI can run concurrent requests.
     """
 
     def __init__(self) -> None:
@@ -23,7 +23,7 @@ class SessionStore:
         self._file_path = Path(self._settings.session_store_path)
         # Ensure the parent directory exists
         self._file_path.parent.mkdir(parents=True, exist_ok=True)
-        self._lock = Lock()
+        self._lock = RLock()
         self._sessions: Dict[str, ChatSession] = {}
         self._load()
 
