@@ -43,4 +43,14 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> Settings:
-    return Settings()
+    # Load settings from environment / .env first
+    s = Settings()
+    # Backwards-compat: some deployments (e.g. Railway) use ACCESS_TOKEN
+    # as the name for the WhatsApp bearer token. Accept that as a fallback
+    # so users don't need to rename env vars immediately.
+    import os
+
+    if not s.whatsapp_token:
+        s.whatsapp_token = os.getenv("ACCESS_TOKEN", "")
+
+    return s
