@@ -64,7 +64,11 @@ async def receive_message(request: Request) -> dict:
                     continue
 
                 for raw_msg in value.messages:
-                    await _process_single_message(raw_msg)
+                    try:
+                        await _process_single_message(raw_msg)
+                    except Exception as e:
+                        # Log per-message errors so one bad message doesn't break others
+                        logger.exception(f"Failed processing single message: {e}")
 
     except Exception as e:
         # Meta ko hamesha 200 chahiye, warna wo retry karta raha

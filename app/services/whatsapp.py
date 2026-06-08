@@ -36,13 +36,22 @@ async def send_text_message(to: str, message: str) -> bool:
                 headers=headers,
             )
             response.raise_for_status()
-            logger.info(f"Message sent to {to} | status={response.status_code}")
+            logger.info(f"Message sent to {to} | status={response.status_code} | body={response.text}")
             return True
 
     except httpx.HTTPStatusError as e:
+        # Include request/response details to help debugging in production logs
+        resp = e.response
+        try:
+            body = resp.text
+        except Exception:
+            body = "<unreadable>"
         logger.error(
-            f"WhatsApp API HTTP error | to={to} | "
-            f"status={e.response.status_code} | body={e.response.text}"
+            "WhatsApp API HTTP error | to=%s | status=%s | url=%s | body=%s",
+            to,
+            getattr(resp, "status_code", "?"),
+            getattr(resp, "url", "?"),
+            body,
         )
         return False
 
