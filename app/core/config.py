@@ -15,7 +15,10 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = "mera_secret_verify_token_123"
 
     # OpenAI
-    OPENAI_API_KEY: str = "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"
+    # NOTE: Do NOT hardcode API keys here. Set `OPENAI_API_KEY` in your
+    # environment (Railway/GCP/AWS) or in a local `.env` file that is
+    # excluded from version control. Default to empty string.
+    OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "llama-3.1-8b-instant"
 
     # App
