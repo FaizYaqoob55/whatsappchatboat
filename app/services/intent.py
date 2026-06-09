@@ -1,6 +1,12 @@
 """
-Intent Detection Service
-Customer ka message dekh ke decide karta hai kya reply karna hai
+Intent Detection Service — LEGACY / UNUSED
+==========================================
+Ye module currently chatbot.py mein use nahi hota.
+Groq AI automatically intent samajhta hai system prompt ke zariye.
+
+Agar future mein pre-processing ya routing logic chahiye ho
+(e.g., specific intents ke liye alag handlers), tab ye module
+use mein aayega. Abhi sirf reference ke liye rakha gaya hai.
 """
 from enum import Enum
 import re
@@ -66,8 +72,11 @@ _PRICE_KEYWORDS = [
 
 def detect_intent(message: str) -> Intent:
     """
-    Message ka intent detect karo.
+    Message ka intent detect karo (keyword-based).
     Returns Intent enum value.
+
+    NOTE: Ye function currently active code mein call nahi hota.
+    Groq AI directly intent handle karta hai via system prompt.
     """
     text = message.lower().strip()
     text = re.sub(r"[^\w\s]", " ", text)  # punctuation remove

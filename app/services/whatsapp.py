@@ -60,14 +60,15 @@ async def send_text_message(to: str, message: str) -> bool:
         return False
 
 
-async def send_typing_indicator(to: str) -> None:
+async def send_typing_indicator(message_id: str) -> None:
     """
-    'Typing...' indicator bhejo (optional, nice UX).
+    'Typing...' indicator bhejo — message_id chahiye (phone number nahi).
+    Read receipt mark karta hai jo WhatsApp mein typing simulate karta hai.
     """
     payload = {
         "messaging_product": "whatsapp",
         "status": "read",
-        "message_id": to,  # best-effort
+        "message_id": message_id,
     }
     headers = {
         "Authorization": f"Bearer {settings.whatsapp_token}",

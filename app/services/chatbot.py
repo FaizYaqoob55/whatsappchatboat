@@ -17,12 +17,11 @@ from groq import AsyncGroq
 
 from app.core.config import get_settings
 from app.models.schemas import ChatSession
+from app.services.session_store import SessionStore
 
 settings = get_settings()
 
-# ── In-Memory Chat Sessions (phone → ChatSession) ────────────────────────────
-_sessions: dict[str, ChatSession] = {}
-from app.services.session_store import SessionStore
+# ── Persistent Session Store (phone → ChatSession) ────────────────────────────
 _session_store = SessionStore()
 
 
@@ -61,7 +60,6 @@ def _load_business_data() -> dict:
             "business_name": settings.business_name,
             "business_description": settings.business_description,
         }
-
 
 
 def get_or_create_session(phone: str) -> ChatSession:
@@ -139,12 +137,12 @@ async def generate_reply(phone: str, message: str) -> str:
 
 async def _call_groq(session: ChatSession) -> str:
     """Call the Groq API with the system prompt and full conversation history."""
-    if not settings.OPENAI_API_KEY:
-        logger.error("OPENAI_API_KEY not set in .env!")
+    if not settings.GROQ_API_KEY:
+        logger.error("GROQ_API_KEY not set in .env!")
         return "⚠️ The bot is not configured yet. Please try again later."
 
     try:
-        client = AsyncGroq(api_key=settings.OPENAI_API_KEY)
+        client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
         messages = [
             {"role": "system", "content": build_system_prompt()}
@@ -153,7 +151,7 @@ async def _call_groq(session: ChatSession) -> str:
         messages.extend(session.get_openai_history())
 
         response = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
+            model=settings.GROQ_MODEL,
             messages=messages,
             max_tokens=400,
             temperature=0.7,
@@ -162,7 +160,7 @@ async def _call_groq(session: ChatSession) -> str:
 
         reply = response.choices[0].message.content.strip()
         logger.debug(
-            f"Groq success | model={settings.OPENAI_MODEL} "
+            f"Groq success | model={settings.GROQ_MODEL} "
             f"| tokens={response.usage.total_tokens}"
         )
         return reply
