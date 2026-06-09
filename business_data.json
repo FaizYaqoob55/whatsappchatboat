@@ -1,10 +1,137 @@
 {
-  "business_name": "My Online Store",
-  "business_description": "We are an online store based in Pakistan selling quality products at affordable prices. We offer a wide range of items including clothing, electronics, home goods, and accessories. Our prices range from Rs. 500 to Rs. 10,000. We provide fast delivery (2-3 working days) across Pakistan. We accept cash on delivery, bank transfer, and Easypaisa/JazzCash. For any queries, contact us Monday to Saturday, 9 AM to 6 PM at 0300-XXXXXXX. We have a 7-day return/exchange policy. Customer satisfaction is our top priority.",
-  "working_hours": "Monday - Saturday, 9 AM - 6 PM",
-  "contact_number": "0300-XXXXXXX",
-  "delivery_time": "2-3 working days",
-  "payment_methods": ["Cash on Delivery", "Bank Transfer", "Easypaisa", "JazzCash"],
-  "return_policy": "7-day return and exchange policy",
-  "price_range": "Rs. 500 to Rs. 10,000"
+  "business_name": "CareDesk",
+  "business_tagline": "Your Growth, Our Mission",
+  "business_type": "IT & Digital Agency",
+  "business_description": "CareDesk is a professional IT and Digital Agency based in Pakistan, helping businesses grow online through cutting-edge technology and creative digital solutions. We build high-performance websites, mobile apps, AI-powered tools, and result-driven marketing strategies. Our team of experts is dedicated to delivering real business results — not just services.",
+
+  "website": "https://www.caredesko.com",
+  "email": "info@caredesko.com",
+  "whatsapp_inquiry": "Send message on this WhatsApp or email us at info@caredesko.com",
+
+  "working_hours": "Monday to Saturday, 10 AM – 7 PM (PKT)",
+  "response_time": "We typically respond within a few hours. For urgent queries, WhatsApp is the fastest way.",
+
+  "services": {
+    "web_and_app_development": {
+      "name": "Website & App Development",
+      "description": "We design and develop fast, modern, and fully responsive websites and mobile applications tailored to your business needs. From simple landing pages to full e-commerce stores and custom web apps — we build it all with clean code and great UX.",
+      "highlights": [
+        "Custom websites (business, portfolio, landing pages)",
+        "E-commerce stores (Shopify, WooCommerce, custom)",
+        "Mobile apps (Android & iOS)",
+        "Web applications & dashboards",
+        "WordPress & headless CMS development",
+        "API integrations & backend systems"
+      ]
+    },
+    "ai_solutions": {
+      "name": "AI Chatbot & AI Calling Assistant",
+      "description": "We build intelligent AI-powered chatbots and voice-based calling assistants that handle customer queries 24/7, qualify leads, book appointments, and automate business workflows — just like a real human agent.",
+      "highlights": [
+        "WhatsApp AI chatbots",
+        "Website AI chat widgets",
+        "AI voice calling assistants",
+        "Lead qualification automation",
+        "Appointment booking bots",
+        "Custom AI agents for any platform"
+      ]
+    },
+    "social_media": {
+      "name": "Social Media Marketing & Management",
+      "description": "We manage your social media presence end-to-end — content creation, scheduling, community management, paid ads, and performance reporting. We help brands build a strong digital footprint and grow their audience organically and through targeted campaigns.",
+      "highlights": [
+        "Facebook & Instagram marketing",
+        "TikTok content strategy",
+        "LinkedIn B2B marketing",
+        "Paid ad campaigns (Meta Ads, Google Ads)",
+        "Content calendars & scheduling",
+        "Monthly performance reports"
+      ]
+    },
+    "design": {
+      "name": "Graphic Design & UI/UX Design",
+      "description": "From brand identity to pixel-perfect UI — our design team creates visuals that communicate your brand story and convert visitors into customers. We combine aesthetics with user psychology to build experiences people love.",
+      "highlights": [
+        "Logo & brand identity design",
+        "Social media graphics & banners",
+        "UI/UX design for websites & apps",
+        "Figma prototypes & wireframes",
+        "Flyers, brochures & print design",
+        "Motion graphics & reels"
+      ]
+    }
+  },
+
+  "why_choose_us": [
+    "Real results — we focus on outcomes, not just deliverables",
+    "Experienced team of developers, designers, and marketers",
+    "Full-service agency — no need to hire multiple vendors",
+    "Transparent communication throughout the project",
+    "On-time delivery with post-launch support",
+    "Affordable pricing for startups and growing businesses"
+  ],
+
+  "portfolio_clients": [
+    {
+      "name": "Al Bashar Store",
+      "url": "https://albasharstore.com",
+      "industry": "Electronics E-commerce",
+      "description": "Online electronics store selling premium headphones, earbuds, Bluetooth speakers, and smartwatches across Pakistan."
+    },
+    {
+      "name": "Cakes Forever",
+      "url": "https://cakesforever.shop",
+      "industry": "Bakery & Food E-commerce",
+      "description": "Custom cake ordering platform — making every celebration unforgettable with beautiful, personalized cakes."
+    },
+    {
+      "name": "NB Fashion",
+      "url": "https://nbfashion.shop",
+      "industry": "Fashion E-commerce",
+      "description": "Online fashion store offering trendy clothing and accessories for modern shoppers."
+    },
+    {
+      "name": "Maura Boutique",
+      "url": "https://mauraboutique.shop",
+      "industry": "Fashion & Boutique E-commerce",
+      "description": "Premium boutique brand where style meets confidence — featuring curated fashion collections."
+    },
+    {
+      "name": "Serenity Himalayan",
+      "url": "https://serenityhimalayan.com",
+      "industry": "Wellness & Export",
+      "description": "7 years of expertise in mining, manufacturing, and supplying premium Himalayan Pink Salt products worldwide."
+    },
+    {
+      "name": "Hammad Trade",
+      "url": "https://hammadtrade.shop",
+      "industry": "Trade & E-commerce",
+      "description": "E-commerce store built for trading and retail operations."
+    },
+    {
+      "name": "Maarij Sports",
+      "url": "https://maarijsports.com",
+      "industry": "Leather & Sports Export",
+      "description": "Premium leather apparel and sports gear brand — leather jackets, boxing bags, gloves and accessories exported worldwide."
+    }
+  ],
+
+  "pricing_policy": "We do not share pricing on WhatsApp. Every project is unique and pricing depends on scope, features, and timeline. Please email us at info@caredesko.com with your project details and our team will share a custom quote within 24 hours.",
+
+  "process": [
+    "Discovery — We understand your business goals and requirements",
+    "Proposal — We share a detailed project plan and timeline",
+    "Design — We create wireframes and design mockups for your approval",
+    "Development — Our team builds and tests the solution",
+    "Launch — We deploy and go live with full support",
+    "Growth — We provide ongoing support and optimization"
+  ],
+
+  "faqs": {
+    "how_long_does_a_website_take": "A standard website takes 1-2 weeks. E-commerce stores or custom web apps can take 3-6 weeks depending on complexity.",
+    "do_you_work_with_startups": "Absolutely! We love working with startups and early-stage businesses. We offer solutions that scale with your growth.",
+    "what_is_your_revision_policy": "We offer multiple revision rounds to ensure you are 100% satisfied with the deliverable.",
+    "do_you_provide_maintenance": "Yes, we offer monthly maintenance and support packages after project delivery.",
+    "which_countries_do_you_work_with": "We work with clients globally — Pakistan, UK, UAE, USA, Canada, and more."
+  }
 }

@@ -75,7 +75,8 @@ class ChatSession(BaseModel):
         if len(self.messages) > 20:
             self.messages = self.messages[-20:]
 
-    def get_openai_history(self) -> List[dict]:
+    def get_openai_history(self) -> list[dict]:
+        """Return conversation history in OpenAI/Groq message format."""
         return [{"role": m.role, "content": m.content} for m in self.messages]
 
 

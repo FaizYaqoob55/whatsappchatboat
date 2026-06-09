@@ -29,8 +29,8 @@ class Settings(BaseSettings):
 
     # Session store
     session_store_path: str = "data/sessions.json"
-    business_name: str = "My Online Store"
-    business_description: str = "We sell quality products online in Pakistan"
+    business_name: str = "CareDesk"
+    business_description: str = "CareDesk is a professional IT and Digital Agency offering Website & App Development, AI Chatbots, Social Media Marketing, and Graphic Design."
 
     @property
     def is_production(self) -> bool:

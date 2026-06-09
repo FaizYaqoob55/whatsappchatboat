@@ -24,4 +24,4 @@ services:
       - key: LOG_LEVEL
         value: INFO
       - key: BUSINESS_NAME
-        value: My Online Store
+        value: CareDesk
