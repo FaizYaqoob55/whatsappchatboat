@@ -306,7 +306,17 @@ async def _call_groq(session: ChatSession) -> str:
         return reply
 
     except Exception as e:
-        logger.error(f"Groq API error: {e}", exc_info=True)
+        # loguru crashes if the error string contains unescaped braces when used in f-strings directly.
+        # Passing 'e' as an argument using '{}' formatting prevents the KeyError.
+        error_msg = str(e)
+        if "RateLimitError" in error_msg or "429" in error_msg:
+            logger.warning("Groq API rate limit reached. Waiting for next window.")
+            return (
+                "Sorry, our system is currently receiving a high volume of messages. ⏳\n"
+                "Please try again in a minute, or email us at *info@caredesko.com*."
+            )
+        
+        logger.error("Groq API error: {}", error_msg, exc_info=True)
         return (
             "Sorry for the inconvenience! 😔 Please drop us an email at "
             "*info@caredesko.com* and our team will get back to you right away."

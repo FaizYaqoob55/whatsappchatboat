@@ -71,9 +71,9 @@ class ChatSession(BaseModel):
 
     def add_message(self, role: str, content: str) -> None:
         self.messages.append(ChatMessage(role=role, content=content))
-        # Last 20 messages rakhna (memory limit)
-        if len(self.messages) > 20:
-            self.messages = self.messages[-20:]
+        # Keep only the last 6 messages (3 turns) to save TPM (Tokens Per Minute) limit
+        if len(self.messages) > 6:
+            self.messages = self.messages[-6:]
 
     def get_openai_history(self) -> list[dict]:
         """Return conversation history in OpenAI/Groq message format."""
