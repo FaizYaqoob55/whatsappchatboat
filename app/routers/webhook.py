@@ -65,7 +65,7 @@ async def receive_message(request: Request) -> dict:
 
                 for raw_msg in value.messages:
                     try:
-                        await _process_single_message(raw_msg)
+                        await _process_single_message(raw_msg, str(request.base_url))
                     except Exception as e:
                         # Log per-message errors so one bad message doesn't break others
                         logger.exception(f"Failed processing single message: {e}")
@@ -77,7 +77,7 @@ async def receive_message(request: Request) -> dict:
     return {"status": "ok"}
 
 
-async def _process_single_message(raw_msg: dict) -> None:
+async def _process_single_message(raw_msg: dict, base_url: str) -> None:
     """
     Ek message process karo — parse, reply generate, send.
     """
@@ -109,7 +109,12 @@ async def _process_single_message(raw_msg: dict) -> None:
     # Agar AI ne images select ki hain toh bhejo
     if images_to_send:
         for img in images_to_send:
-            image_url = f"{settings.app_url}/media/{img}"
+            # Construct absolute URL dynamically (handles both local and Railway seamlessly)
+            image_url = f"{base_url.rstrip('/')}/media/{img}"
+            # Enforce HTTPS (sometimes load balancers make base_url http://)
+            if image_url.startswith("http://") and "localhost" not in image_url:
+                image_url = image_url.replace("http://", "https://", 1)
+                
             img_success = await send_image_message(to=phone, image_url=image_url)
             if img_success:
                 logger.success(f"Image sent | to={phone} | img={img}")
