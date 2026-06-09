@@ -60,6 +60,42 @@ async def send_text_message(to: str, message: str) -> bool:
         return False
 
 
+async def send_image_message(to: str, image_url: str) -> bool:
+    """
+    Customer ko WhatsApp image message bhejo via link.
+    """
+    payload = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": to,
+        "type": "image",
+        "image": {"link": image_url},
+    }
+
+    headers = {
+        "Authorization": f"Bearer {settings.whatsapp_token}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.post(
+                settings.whatsapp_api_url,
+                json=payload,
+                headers=headers,
+            )
+            response.raise_for_status()
+            logger.info(f"Image sent to {to} | url={image_url}")
+            return True
+    except httpx.HTTPStatusError as e:
+        logger.error(f"WhatsApp API image send error | to={to} | status={e.response.status_code} | body={e.response.text}")
+        return False
+    except httpx.RequestError as e:
+        logger.error(f"WhatsApp API request error (image) | to={to} | error={e}")
+        return False
+
+
+
 async def send_typing_indicator(message_id: str) -> None:
     """
     'Typing...' indicator bhejo — message_id chahiye (phone number nahi).

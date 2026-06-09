@@ -11,7 +11,7 @@ from loguru import logger
 from app.core.config import get_settings
 from app.models.schemas import WhatsAppWebhookPayload, IncomingMessage
 from app.services.chatbot import generate_reply
-from app.services.whatsapp import send_text_message
+from app.services.whatsapp import send_text_message, send_image_message
 
 router = APIRouter(prefix="/webhook", tags=["webhook"])
 settings = get_settings()
@@ -96,12 +96,22 @@ async def _process_single_message(raw_msg: dict) -> None:
     logger.info(f"Incoming message | from={phone} | text='{text[:80]}'")
 
     # Reply generate karo
-    reply = await generate_reply(phone=phone, message=text)
+    reply_text, images_to_send = await generate_reply(phone=phone, message=text)
 
-    # Reply bhejo
-    success = await send_text_message(to=phone, message=reply)
-
-    if success:
-        logger.success(f"Reply sent | to={phone} | reply='{reply[:60]}...'")
-    else:
-        logger.error(f"Failed to send reply | to={phone}")
+    # Text Reply bhejo
+    if reply_text:
+        success = await send_text_message(to=phone, message=reply_text)
+        if success:
+            logger.success(f"Text reply sent | to={phone} | reply='{reply_text[:60]}...'")
+        else:
+            logger.error(f"Failed to send text reply | to={phone}")
+    
+    # Agar AI ne images select ki hain toh bhejo
+    if images_to_send:
+        for img in images_to_send:
+            image_url = f"{settings.app_url}/media/{img}"
+            img_success = await send_image_message(to=phone, image_url=image_url)
+            if img_success:
+                logger.success(f"Image sent | to={phone} | img={img}")
+            else:
+                logger.error(f"Failed to send image | to={phone} | img={img}")

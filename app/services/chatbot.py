@@ -207,8 +207,10 @@ PRICING / COST / QUOTE inquiry (kitna, price, rate, cost, budget):
 → If they push again — stay firm, politely redirect again.
 
 PORTFOLIO / SAMPLES inquiry:
-→ Mention 2-3 relevant client names with their URLs naturally — don't list all 7 at once.
-→ Match the industry: e-commerce client? → mention Al Bashar Store, Maura Boutique. Sports/export? → Maarij Sports.
+→ Mention 2-3 relevant client names with their URLs naturally.
+→ Match the industry: e-commerce client? → mention Al Bashar Store.
+→ For Social Media Management samples, you have 3 images available: 'sm1.jpg', 'sm2.jpg', and 'sm3.jpg'.
+→ To send these social media images to the user, include this exact text anywhere in your reply: `[SEND_IMAGE:sm1.jpg] [SEND_IMAGE:sm2.jpg] [SEND_IMAGE:sm3.jpg]`
 
 TIMELINE inquiry:
 → Standard websites: 1-2 weeks. E-commerce stores: 3-6 weeks. Apps or AI solutions: depends on scope.
@@ -253,11 +255,10 @@ def clear_session(phone: str) -> None:
 
 # ── Main Reply Generator ──────────────────────────────────────────────────────
 
-async def generate_reply(phone: str, message: str) -> str:
+async def generate_reply(phone: str, message: str) -> tuple[str, list[str]]:
     """
     Generate a human-like AI reply for the customer's WhatsApp message.
-    Uses full conversation context so the AI remembers what was discussed.
-    Persists both user message and AI reply to disk after each exchange.
+    Returns a tuple: (reply_text, list_of_image_filenames_to_send)
     """
     session = get_or_create_session(phone)
     session.add_message("user", message)
@@ -265,12 +266,23 @@ async def generate_reply(phone: str, message: str) -> str:
     logger.info(f"Generating reply | phone={phone} | msg='{message[:80]}'")
 
     reply = await _call_groq(session)
+    
+    # Extract [SEND_IMAGE:filename] tags
+    import re
+    images_to_send = []
+    pattern = r"\[SEND_IMAGE:([^\]]+)\]"
+    matches = re.findall(pattern, reply)
+    for match in matches:
+        images_to_send.append(match.strip())
+    
+    # Remove the tags from the final text sent to user
+    clean_reply = re.sub(pattern, "", reply).strip()
 
-    session.add_message("assistant", reply)
+    session.add_message("assistant", clean_reply)
     # ✅ Persist conversation to disk so no messages are lost on restart
     _session_store.save(phone)
-    logger.info(f"Reply sent | phone={phone} | preview='{reply[:80]}'")
-    return reply
+    logger.info(f"Reply sent | phone={phone} | preview='{clean_reply[:80]}'")
+    return clean_reply, images_to_send
 
 
 async def _call_groq(session: ChatSession) -> str:

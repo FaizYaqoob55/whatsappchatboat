@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.logging import setup_logging
 from app.routers import webhook, health
+import os
+from fastapi.responses import FileResponse
 
 settings = get_settings()
 
@@ -49,3 +51,11 @@ app.add_middleware(
 # ── Routers ──
 app.include_router(health.router)
 app.include_router(webhook.router)
+
+@app.get("/media/{filename}")
+async def get_media(filename: str):
+    """Serve images dynamically for WhatsApp API to download and send."""
+    file_path = os.path.join("data", "images", filename)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    return {"error": "File not found"}
